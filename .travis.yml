@@ -1,0 +1,22 @@
+language: ruby
+cache: bundler
+
+rvm:
+  - 2.4.0
+
+before_install: gem install bundler -v 1.16.0
+
+notifications:
+  email:
+    recipients:
+      - chad.bowman0@gmail.com
+    on_failure: change
+    on_success: never
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  project_name: kril
+  on:
+    branch: master

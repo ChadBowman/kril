@@ -1,0 +1,1517 @@
+{
+  "type": "record",
+  "name": "Party",
+  "namespace": "com.sofi.customers.schemas",
+  "doc": "A party record is sent to Kafka when changes are made to Party entity. When any party field changes,\\n    the entire Party is published. Some fields of this schema will be empty when there are no active\\n    records in the DB.Sometimes fields like militaryInfo, personInfo, partyEthnicity, and fraudInfo\\n    (These entities that can have onlyONE current instance at a time) will be null when there are no\\n    active records in the DB.",
+  "fields": [
+    {
+      "name": "partyId",
+      "type": "long",
+      "doc": "Party's ID in the customers service"
+    },
+    {
+      "name": "partyType",
+      "type": [
+        "null",
+        {
+          "type": "string",
+          "avro.java.string": "String"
+        }
+      ],
+      "doc": "Party's type (CUSTOMER, EMPLOYEE, etc)",
+      "default": null
+    },
+    {
+      "name": "active",
+      "type": "boolean",
+      "doc": "Party's status like active (true) or inactive (false)"
+    },
+    {
+      "name": "addresses",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "Address",
+            "doc": "A party can have many addresses, but can only have one address per addressType",
+            "fields": [
+              {
+                "name": "partyId",
+                "type": "long",
+                "doc": "Party's ID in the customers service"
+              },
+              {
+                "name": "type",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "The type of Address (HOME, WORK, etc)",
+                "default": null
+              },
+              {
+                "name": "status",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "The status of the Address like Present"
+              },
+              {
+                "name": "duration",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Duration says in years how long Party has been staying at given address (ONE, TWO, etc)"
+              },
+              {
+                "name": "lineOne",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "The address line one"
+              },
+              {
+                "name": "lineTwo",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "The address line two"
+              },
+              {
+                "name": "lineThree",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "The address line three"
+              },
+              {
+                "name": "unitNumber",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "The unit number"
+              },
+              {
+                "name": "city",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "The city"
+              },
+              {
+                "name": "localeName",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Full state (or province) name i.e Montana"
+              },
+              {
+                "name": "localeCode",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "State (or province) name with 2-char format i.e MT"
+              },
+              {
+                "name": "postalCode",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "The postal code"
+              },
+              {
+                "name": "countryCode",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "2-char country code like US"
+              }
+            ],
+            "version": 1
+          }
+        }
+      ],
+      "doc": "A party can have many addresses, but can only have one address per\\n        AddressType. It will be empty, when there are no active records.",
+      "default": null
+    },
+    {
+      "name": "emails",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "Email",
+            "doc": "A party can have many Emails, but only one per type.",
+            "fields": [
+              {
+                "name": "partyId",
+                "type": "long",
+                "doc": "Party's ID in the customers service"
+              },
+              {
+                "name": "emailAddress",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Party's email address",
+                "default": null
+              },
+              {
+                "name": "emailType",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "The type of email (PRIMARY, SECONDARY, etc)",
+                "default": null
+              }
+            ],
+            "version": 1
+          }
+        }
+      ],
+      "doc": "A party can have multiple Emails, but only one per type (EmailType: PRIMARY,\\n        SECONDARY). It will be empty, when there are no active records.",
+      "default": null
+    },
+    {
+      "name": "names",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "PartyName",
+            "doc": "Party names, a Party can have two type names (LEGAL, COMMON).",
+            "fields": [
+              {
+                "name": "partyId",
+                "type": "long",
+                "doc": "Party's ID in the customers service"
+              },
+              {
+                "name": "firstName",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Party's first name"
+              },
+              {
+                "name": "middleName",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Optional Party's middle name",
+                "default": null
+              },
+              {
+                "name": "lastName",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Party's last name",
+                "default": null
+              },
+              {
+                "name": "businessName",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Optional Party's business name",
+                "default": null
+              },
+              {
+                "name": "namePrefix",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Optional Party's name prefix i.e MR, MS, etc",
+                "default": null
+              },
+              {
+                "name": "nameSuffix",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Optional Party's name suffix i.e JR, SR, etc",
+                "default": null
+              },
+              {
+                "name": "type",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Party's name type (LEGAL, COMMON)",
+                "default": null
+              }
+            ],
+            "version": 1
+          }
+        }
+      ],
+      "doc": "A party can have two names, NameType.COMMON and NameType.LEGAL. It will\\n        be empty, when there are no active records.",
+      "default": null
+    },
+    {
+      "name": "militaryInfo",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "MilitaryInfo",
+          "doc": "The party military info. Party can only have one active militaryInfo",
+          "fields": [
+            {
+              "name": "partyId",
+              "type": "long",
+              "doc": "Party's ID in the customers service"
+            },
+            {
+              "name": "yearsMilitaryExperience",
+              "type": [
+                "null",
+                "int"
+              ],
+              "doc": "Party's military years of experience"
+            },
+            {
+              "name": "veteranStatus",
+              "type": [
+                "null",
+                {
+                  "type": "string",
+                  "avro.java.string": "String"
+                }
+              ],
+              "doc": "Party's veteran status"
+            },
+            {
+              "name": "armedServiceStatus",
+              "type": [
+                "null",
+                {
+                  "type": "string",
+                  "avro.java.string": "String"
+                }
+              ],
+              "doc": "Party's army service status"
+            }
+          ],
+          "version": 1
+        }
+      ],
+      "doc": "A party can only have one active MilitaryInfo. If there is no military info,\\n        then It will be null.",
+      "default": null
+    },
+    {
+      "name": "personInfo",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "PersonInfo",
+          "doc": "PersonInfo is party basic information",
+          "fields": [
+            {
+              "name": "partyId",
+              "type": "long",
+              "doc": "Party's ID in the customers service"
+            },
+            {
+              "name": "gender",
+              "type": [
+                "null",
+                {
+                  "type": "string",
+                  "avro.java.string": "String"
+                }
+              ],
+              "doc": "Party's gender (M, F)",
+              "default": null
+            },
+            {
+              "name": "maritalStatus",
+              "type": [
+                "null",
+                {
+                  "type": "string",
+                  "avro.java.string": "String"
+                }
+              ],
+              "doc": "Party's marital status (MARRIED, SEPARATED, etc)",
+              "default": null
+            },
+            {
+              "name": "housingStatus",
+              "type": [
+                "null",
+                {
+                  "type": "string",
+                  "avro.java.string": "String"
+                }
+              ],
+              "doc": "Party's housing status (RENT, OWN, etc)",
+              "default": null
+            },
+            {
+              "name": "deceased",
+              "type": [
+                "null",
+                "boolean"
+              ],
+              "doc": "Party's deceased status"
+            },
+            {
+              "name": "noCollege",
+              "type": [
+                "null",
+                "boolean"
+              ],
+              "doc": "Party's noCollege status"
+            },
+            {
+              "name": "yearsOfExperience",
+              "type": [
+                "null",
+                "int"
+              ],
+              "doc": "Party's years of professional experience"
+            },
+            {
+              "name": "profession",
+              "type": [
+                "null",
+                {
+                  "type": "string",
+                  "avro.java.string": "String"
+                }
+              ],
+              "doc": "Party's profession"
+            },
+            {
+              "name": "citizenship",
+              "type": [
+                "null",
+                {
+                  "type": "string",
+                  "avro.java.string": "String"
+                }
+              ],
+              "doc": "Party's citizenship type (CITIZEN, RESIDENT, etc)"
+            },
+            {
+              "name": "countryOfResidence",
+              "type": [
+                "null",
+                {
+                  "type": "string",
+                  "avro.java.string": "String"
+                }
+              ],
+              "doc": "Party's country of residence"
+            },
+            {
+              "name": "countryOfCitizenship",
+              "type": [
+                "null",
+                {
+                  "type": "string",
+                  "avro.java.string": "String"
+                }
+              ],
+              "doc": "Party's country of citizenship like US"
+            },
+            {
+              "name": "medicalResident",
+              "type": [
+                "null",
+                "boolean"
+              ],
+              "doc": "Party's medical resident status"
+            },
+            {
+              "name": "appliedForGreencard",
+              "type": [
+                "null",
+                "boolean"
+              ],
+              "doc": "This field indicates whether Party is applied for green card or not"
+            }
+          ],
+          "version": 1
+        }
+      ],
+      "doc": "A party can only have one active PersonInfo at a time. If there is no\\n        person info, then It will be null.",
+      "default": null
+    },
+    {
+      "name": "phones",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "Phone",
+            "doc": "A Party can have multiple Phones, but only one per type",
+            "fields": [
+              {
+                "name": "partyId",
+                "type": "long",
+                "doc": "Party's ID in the customers service"
+              },
+              {
+                "name": "countryPrefix",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "The country prefix"
+              },
+              {
+                "name": "areaCode",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Phone Area code"
+              },
+              {
+                "name": "extension",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Phone extension"
+              },
+              {
+                "name": "phoneNumber",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Phone number",
+                "default": null
+              },
+              {
+                "name": "phoneType",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Phone type (HOME, WORK)",
+                "default": null
+              },
+              {
+                "name": "smsAccepted",
+                "type": [
+                  "null",
+                  "boolean"
+                ],
+                "doc": "Phone SMS acceptance status"
+              },
+              {
+                "name": "designation",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Phone designation like PRIMARY"
+              }
+            ],
+            "version": 1
+          }
+        }
+      ],
+      "doc": "A Party can have multiple Phones, but only one per type. It will be empty\\n        when there are no phones.",
+      "default": null
+    },
+    {
+      "name": "partyEthnicity",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "PartyEthnicity",
+          "doc": "Party's ethnicity. Only one ethnicity per Party",
+          "fields": [
+            {
+              "name": "partyId",
+              "type": "long",
+              "doc": "Party's ID in the customers service"
+            },
+            {
+              "name": "ethnicity",
+              "type": [
+                "null",
+                {
+                  "type": "string",
+                  "avro.java.string": "String"
+                }
+              ],
+              "doc": "Party's ethnicity like HISPANIC, OTHER",
+              "default": null
+            }
+          ],
+          "version": 1
+        }
+      ],
+      "doc": "A party can only have one active ethnicity. It will be null when there is\\n        no active ethnicity of the Party.",
+      "default": null
+    },
+    {
+      "name": "servicingInfos",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "ServicingInfo",
+            "doc": "Servicing system information",
+            "fields": [
+              {
+                "name": "partyId",
+                "type": "long",
+                "doc": "Party's ID in the customers service"
+              },
+              {
+                "name": "type",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "The Servicing system type like MOHELA, SOFI_PL, etc",
+                "default": null
+              },
+              {
+                "name": "contactable",
+                "type": [
+                  "null",
+                  "boolean"
+                ],
+                "doc": "Servicing system contactable status"
+              }
+            ],
+            "version": 1
+          }
+        }
+      ],
+      "doc": "A party can only have one active servicingInfos per ServicingType.\\n        If there is no servicing info, then it will be empty.",
+      "default": null
+    },
+    {
+      "name": "partyRaces",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "PartyRace",
+            "doc": "Party race",
+            "fields": [
+              {
+                "name": "partyId",
+                "type": "long",
+                "doc": "Party's ID in the customers service"
+              },
+              {
+                "name": "race",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Party's race like INDIAN, ASIAN, etc",
+                "default": null
+              }
+            ],
+            "version": 1
+          }
+        }
+      ],
+      "doc": "A party can have multiple races. It will be empty on no active records.",
+      "default": null
+    },
+    {
+      "name": "restrictions",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "Restriction",
+            "doc": "Restrictions on Party, a Party can have many Restrictions, but one per RestrictionType.",
+            "fields": [
+              {
+                "name": "partyId",
+                "type": "long",
+                "doc": "Party's ID in the customers service"
+              },
+              {
+                "name": "active",
+                "type": [
+                  "null",
+                  "boolean"
+                ],
+                "doc": "Restriction status"
+              },
+              {
+                "name": "bypassRoleCode",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Bypass role code (ADMIN, USER, etc)",
+                "default": null
+              },
+              {
+                "name": "restrictionType",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Restriction type (SUPERVISOR, OTHER, etc)",
+                "default": null
+              }
+            ],
+            "version": 1
+          }
+        }
+      ],
+      "doc": "A party can have many restrictions, but one per RestrictionType. It will\\n        be empty on no active records.",
+      "default": null
+    },
+    {
+      "name": "educations",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "Education",
+            "doc": "A party can have multiple educations.",
+            "fields": [
+              {
+                "name": "partyId",
+                "type": "long",
+                "doc": "Party's ID in the customers service"
+              },
+              {
+                "name": "programId",
+                "type": [
+                  "null",
+                  "long"
+                ],
+                "doc": "Program id"
+              },
+              {
+                "name": "graduated",
+                "type": [
+                  "null",
+                  "boolean"
+                ],
+                "doc": "Graduated in this program or course"
+              },
+              {
+                "name": "ncsVerificationId",
+                "type": [
+                  "null",
+                  "long"
+                ],
+                "doc": "NCS verification Id"
+              },
+              {
+                "name": "separationDate",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Separation date (YYYY-MM-DD)"
+              },
+              {
+                "name": "universityId",
+                "type": [
+                  "null",
+                  "long"
+                ],
+                "doc": "University id where Party still studying or graduated"
+              }
+            ],
+            "version": 1
+          }
+        }
+      ],
+      "doc": "A party can have multiple educations. It will be empty, if there are no\\n        active records.",
+      "default": null
+    },
+    {
+      "name": "identifiers",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "Identifier",
+            "doc": "Party's identifier",
+            "fields": [
+              {
+                "name": "partyId",
+                "type": "long",
+                "doc": "Party's ID in the customers service"
+              },
+              {
+                "name": "value",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Identifier value (string)",
+                "default": null
+              },
+              {
+                "name": "columnValueType",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Column value type like VARCHAR",
+                "default": null
+              },
+              {
+                "name": "typeCode",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Identifier type code (NII,NVI, etc)",
+                "default": null
+              }
+            ],
+            "version": 1
+          }
+        }
+      ],
+      "doc": "A party can have many identifiers but only one active per IdentifierType.\\n        It will be empty, if there are no identifiers.",
+      "default": null
+    },
+    {
+      "name": "consents",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "Consent",
+            "doc": "Party's can have many consents, but only one (active) Consent for each agreement type",
+            "fields": [
+              {
+                "name": "partyId",
+                "type": "long",
+                "doc": "Party's ID in the customers service"
+              },
+              {
+                "name": "consentDate",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Consent date (YYYY-MM-DD)"
+              },
+              {
+                "name": "expirationDate",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Consent expiration date (YYYY-MM-DD)"
+              },
+              {
+                "name": "optOutDate",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Consent opt out date (YYYY-MM-DD)"
+              },
+              {
+                "name": "consentAgreement",
+                "type": [
+                  "null",
+                  {
+                    "type": "record",
+                    "name": "ConsentAgreement",
+                    "doc": "Consent agreement",
+                    "fields": [
+                      {
+                        "name": "type",
+                        "type": [
+                          "null",
+                          {
+                            "type": "string",
+                            "avro.java.string": "String"
+                          }
+                        ],
+                        "doc": "Agreement type like COMMUNICATIONS, PRIVACY, etc",
+                        "default": null
+                      },
+                      {
+                        "name": "text",
+                        "type": [
+                          "null",
+                          {
+                            "type": "string",
+                            "avro.java.string": "String"
+                          }
+                        ],
+                        "doc": "Agreement text i.e Communications Policy, Disclosure Policy",
+                        "default": null
+                      },
+                      {
+                        "name": "version",
+                        "type": [
+                          "null",
+                          "int"
+                        ],
+                        "doc": "Version indicates how many times the agreement has been revised, specifically,\\n        the number of revisions equals version number minus one.",
+                        "default": null
+                      }
+                    ],
+                    "version": 1
+                  }
+                ],
+                "doc": "Consent agreement",
+                "default": null
+              }
+            ],
+            "version": 1
+          }
+        }
+      ],
+      "doc": "A party can have many consents, but only one (active) Consent for each\\n        agreement_type. It will be empty, if there are no active records.",
+      "default": null
+    },
+    {
+      "name": "fraudInfo",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "FraudInfo",
+          "doc": "A party can have only one active fraud_info.",
+          "fields": [
+            {
+              "name": "partyId",
+              "type": "long",
+              "doc": "Party's ID in the customers service"
+            },
+            {
+              "name": "fraudulentAccount",
+              "type": [
+                "null",
+                "boolean"
+              ],
+              "doc": "Status of account whether it is fraud account or not"
+            },
+            {
+              "name": "verifiedActualPerson",
+              "type": [
+                "null",
+                "boolean"
+              ],
+              "doc": "Says, whether the Party is verified or not"
+            },
+            {
+              "name": "identityTheftDetected",
+              "type": [
+                "null",
+                "boolean"
+              ],
+              "doc": "Identity theft detection status"
+            },
+            {
+              "name": "confirmedFraudType",
+              "type": [
+                "null",
+                {
+                  "type": "string",
+                  "avro.java.string": "String"
+                }
+              ],
+              "doc": "Fraud type (ID, INCOME, etc)"
+            }
+          ],
+          "version": 1
+        }
+      ],
+      "doc": "A party can only have one active fraudInfo. If there are no active fraudInfo,\\n        It will be empty.",
+      "default": null
+    },
+    {
+      "name": "contactPrefs",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "ContactPref",
+            "doc": "ContactPref is for contact preference. It is a carryover from v1 customer service.\\n    It is not related to CommunicationPreference in v2 customers service.",
+            "fields": [
+              {
+                "name": "partyId",
+                "type": "long",
+                "doc": "Party's ID in the customers service"
+              },
+              {
+                "name": "contactModePref",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Contact mode pref (NONE is the only option)",
+                "default": null
+              },
+              {
+                "name": "contactType",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Contact type like (COMM, MARKET)",
+                "default": null
+              }
+            ],
+            "version": 1
+          }
+        }
+      ],
+      "doc": "A party can have many contactPrefs. If there are no active,\\n        It will be empty.",
+      "default": null
+    },
+    {
+      "name": "preferences",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "Preference",
+            "doc": "A party preference used to apply to Address, Email, and Phone",
+            "fields": [
+              {
+                "name": "partyId",
+                "type": "long",
+                "doc": "Party's ID in the customers service"
+              },
+              {
+                "name": "type",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Preference type like MARKETING_EMAIL, BUSINESS_SMS",
+                "default": null
+              },
+              {
+                "name": "preference",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Preference is OPT_IN or OPT_OUT",
+                "default": null
+              },
+              {
+                "name": "contactAfterTime",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Military time format (e.g 2100 is 09:00 PM)",
+                "default": null
+              },
+              {
+                "name": "contactBeforeTime",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Military time format (e.g 0900 is 09:00 AM)",
+                "default": null
+              },
+              {
+                "name": "timezone",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "This time zone will be applied to contactAfterTime and contactBeforeTime",
+                "default": null
+              }
+            ],
+            "version": 1
+          }
+        }
+      ],
+      "doc": "A party can have many preferences. It will be empty, if there are no\\n        active preference records.",
+      "default": null
+    },
+    {
+      "name": "compensationSources",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": {
+            "type": "record",
+            "name": "CompensationSource",
+            "doc": "Party's compensation source(Employment), a CompensationSource can have many Compensations",
+            "fields": [
+              {
+                "name": "partyId",
+                "type": "long",
+                "doc": "Party's ID in the customers service"
+              },
+              {
+                "name": "name",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Compensation source name like Job"
+              },
+              {
+                "name": "type",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Compensation source type (EMPLOYEE, RETIREE)",
+                "default": null
+              },
+              {
+                "name": "businessStructureType",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Business structure type"
+              },
+              {
+                "name": "jobTitle",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Job title like Software Engineer"
+              },
+              {
+                "name": "supervisorName",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Supervisor name"
+              },
+              {
+                "name": "employeeType",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Employee type like FULL_TIME, PART_TIME, etc",
+                "default": null
+              },
+              {
+                "name": "typeOfBusiness",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Employer business type like Services"
+              },
+              {
+                "name": "employmentEndDate",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Employment end date (YYYY-MM-DD)"
+              },
+              {
+                "name": "employmentStartDate",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Employment start date (YYYY-MM-DD)"
+              },
+              {
+                "name": "contactPhone",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Employer contact number"
+              },
+              {
+                "name": "employeeId",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Employee id"
+              },
+              {
+                "name": "employerId",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Employer id"
+              },
+              {
+                "name": "employerSource",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Employer source like EFX"
+              },
+              {
+                "name": "employerNumber",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Employer number"
+              },
+              {
+                "name": "significantOwnership",
+                "type": [
+                  "null",
+                  {
+                    "type": "string",
+                    "avro.java.string": "String"
+                  }
+                ],
+                "doc": "Significant ownership"
+              },
+              {
+                "name": "wageIncome",
+                "type": [
+                  "null",
+                  "boolean"
+                ],
+                "doc": "Wage income"
+              },
+              {
+                "name": "hasOneYear1099",
+                "type": [
+                  "null",
+                  "boolean"
+                ],
+                "doc": "Has one year 1099"
+              },
+              {
+                "name": "compensations",
+                "type": [
+                  "null",
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "record",
+                      "name": "Compensation",
+                      "doc": "Compensation(Income) has a CompensationType, and there can be at most one Compensation for\\n    each type in any given CompensationSource.",
+                      "fields": [
+                        {
+                          "name": "compensationSourceId",
+                          "type": "long",
+                          "doc": "CompensationSource Id"
+                        },
+                        {
+                          "name": "type",
+                          "type": [
+                            "null",
+                            {
+                              "type": "string",
+                              "avro.java.string": "String"
+                            }
+                          ],
+                          "doc": "Compensation type i.e SALARY, HOURLY, etc",
+                          "default": null
+                        },
+                        {
+                          "name": "frequency",
+                          "type": [
+                            "null",
+                            {
+                              "type": "string",
+                              "avro.java.string": "String"
+                            }
+                          ],
+                          "doc": "Frequency like ANNUAL, MONTHLY, etc",
+                          "default": null
+                        },
+                        {
+                          "name": "designation",
+                          "type": [
+                            "null",
+                            {
+                              "type": "string",
+                              "avro.java.string": "String"
+                            }
+                          ],
+                          "doc": "A designation for a Compensation: VERIFIED or UNVERIFIED",
+                          "default": null
+                        },
+                        {
+                          "name": "currency",
+                          "type": [
+                            "null",
+                            {
+                              "type": "string",
+                              "avro.java.string": "String"
+                            }
+                          ],
+                          "doc": "Currency type (USD, CAD, etc)",
+                          "default": null
+                        },
+                        {
+                          "name": "amount",
+                          "type": [
+                            "null",
+                            {
+                              "type": "string",
+                              "avro.java.string": "String",
+                              "java-class": "java.math.BigDecimal"
+                            }
+                          ],
+                          "doc": "Amount",
+                          "default": null
+                        }
+                      ],
+                      "version": 1
+                    }
+                  }
+                ],
+                "doc": "CompensationSource can have many Compensations",
+                "default": null
+              }
+            ],
+            "version": 1
+          }
+        }
+      ],
+      "doc": "A party can have multiple CompensationSources, including of the same type.\\n        It will be empty, if there are no active compensation sources.",
+      "default": null
+    }
+  ],
+  "version": 1
+}

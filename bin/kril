@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+
+v_flag = ARGV.map { |arg| true if arg =~ /-\w*v\w*|--verbose/ }.compact.first
+$VERBOSE = nil unless v_flag
+
+require 'avro_turf/messaging'
+require 'clamp'
+require 'kafka'
+require 'httparty'
+
+Clamp do
+  option %w[-k --bootstrap-servers], '', 'address(es) of kafka cluster',
+         default: %w[localhost:9092 localhost:9093 localhost:9094] do |address_string|
+    address_string.split(/,\s*/)
+  end
+
+  option %w[-r --schema-registry], '', 'address of schema registry', default: 'http://localhost:8081'
+  option %w[-v --verbose], :flag, 'print logs, warnings'
+  option %w[-f --follow], :flag, 'listen to topic indefinitely'
+  option %w[-r --schema-repository], '', 'root folder'
+
+  parameter 'TOPIC', 'topic to produce to or consume from'
+  parameter '[NAME]', 'schema name'
+
+  def execute
+    log = Logger.new($STDOUT)
+    log.level = verbose? ? Logger::WARN : Logger::ERROR
+
+    kafka = Kafka.new(bootstrap_servers, logger: log)
+    avro = AvroTurf::Messaging.new(registry_url: schema_registry,
+                                   logger: log)
+
+    if value
+      p record = avro.encode({'full_name' => 'joe', 'address' => 1}, schema_name: name)
+      producer = kafka.producer
+      producer.produce(record, topic: topic)
+      producer.deliver_messages
+      p 'sent'
+    else
+      p topic
+      kafka.each_message(topic: topic) do |message|
+        puts avro.decode(message.value)
+        break unless follow?
+      end
+    end
+  end
+end
