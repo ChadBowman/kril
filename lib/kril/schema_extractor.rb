@@ -3,9 +3,9 @@
 module Kril
   # Extracts avro schemas from avro genrated java files.
   class SchemaExtractor
-    def initialize(source_dir, output_dir)
-      @source_dir = source_dir
-      @output_dir = output_dir
+    def initialize(source_dir:, output_dir:)
+      @source_dir = File.join(Dir.pwd, source_dir)
+      @output_dir = File.join(Dir.pwd, output_dir)
     end
 
     def extract
@@ -28,8 +28,8 @@ module Kril
     end
 
     def write_avsc(contents, directory)
-      file_name = File.join(directory, "#{contents['name']}.avsc")
-      File.open(file_name, 'w') do |file|
+      path = File.join(directory, "#{contents['name']}.avsc")
+      File.open(path, 'w') do |file|
         file.write(JSON.pretty_generate(contents))
       end
     end
@@ -41,8 +41,7 @@ module Kril
     def parse_avro_java_class(file)
       file.each_line do |line|
         extraction = line[/SCHEMA.*parse\("(.*)"\);/, 1]
-        normalised = dejavafy(extraction)
-        break JSON.parse(normalised) if extraction
+        break JSON.parse(dejavafy(extraction)) if extraction
         nil
       end
     end

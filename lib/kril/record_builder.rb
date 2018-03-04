@@ -44,9 +44,6 @@ module Kril
     end
 
     def build_field(field, datum)
-      if datum == '204'
-        puts field
-      end
       check_nullity(datum, field)
       type = field['items'] || field['values'] || field['type']
       convert_type(datum, type)
@@ -62,7 +59,7 @@ module Kril
     def convert_type(datum, type)
       type = gather_types(type)
       if datum.nil?
-        datum
+        nil
       elsif type.include?('int') || type.include?('long')
         datum.to_i
       elsif type.include?('float') || type.include?('double')

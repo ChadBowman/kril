@@ -1,15 +1,15 @@
-# kril 🦐
+# Kril 🦐
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/kril`. To experiment with that code, run `bin/console` for an interactive prompt.
+Kril is an easy to use command line interface (CLI) for interacting with [Apache Kafka](https://kafka.apache.org/). It uses [Apache Avro](https://avro.apache.org/) for serialization/deserialization.
 
-TODO: Delete this and the text above, and describe your gem
+[![Build Status](https://travis-ci.org/ChadBowman/kril.svg?branch=master)](https://travis-ci.org/ChadBowman/kril)
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Add this line to your application's Gemspec:
 
 ```ruby
-gem 'kril'
+spec.add_development_dependency 'kril', '~> 0.1'
 ```
 
 And then execute:
@@ -22,17 +22,67 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Assuming your schema is not registered with the schema registry, and doesn't exist in the repository, you can define a schema and commit a record like so:
+```bash
+$ kril --bootstrap-servers 'localhost:9092,localhost:9093,localhost:9094' \
+--schema-registry 'http://localhost:8081' \
+--with-schema '{"type":"record","name":"human","fields":[{"name":"age","type":"int"}]}' \
+--record '{"age": 27}' \
+human
+```
+```bash
+🦐 saved human: {"type"=>"record", "name"=>"human", "fields"=>[{"name"=>"age", "type"=>"int"}]}
+🦐 human: {"age"=>27}
+```
 
-## Development
-__
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+Now we can consume a single record:
+```bash
+$ kril --pretty-print human
+```
+```bash
+🦐 human: 
+{
+  "key": null,
+  "value": {
+    "age": 27
+  },
+  "offset": 0,
+  "create_time": "2018-03-04 00:29:47 -0700",
+  "topic": "human",
+  "partition": 4
+}
+```
+---
+Now that the schema exists, we can produce records simply:
+```bash
+$ kril -r '{"age": 33}' human
+```
+```bash
+🦐 human: {"age"=>33}
+```
+---
+Consuming all records ever:
+```bash
+$ kril --consume-all human
+```
+```bash
+🦐 human: {:key=>nil, :value=>{"age"=>27}, :offset=>0, :create_time=>2018-03-04 00:12:32 -0700, :topic=>"human", :partition=>2}
+🦐 human: {:key=>nil, :value=>{"age"=>27}, :offset=>0, :create_time=>2018-03-04 00:29:47 -0700, :topic=>"human", :partition=>4}
+🦐 human: {:key=>nil, :value=>{"age"=>27}, :offset=>0, :create_time=>2018-03-04 00:26:33 -0700, :topic=>"human", :partition=>1}
+🦐 human: {:key=>nil, :value=>{"age"=>27}, :offset=>0, :create_time=>2018-03-04 00:25:54 -0700, :topic=>"human", :partition=>3}
+🦐 human: {:key=>nil, :value=>{"age"=>33}, :offset=>1, :create_time=>2018-03-04 00:34:07 -0700, :topic=>"human", :partition=>3}
+🦐 human: {:key=>nil, :value=>{"age"=>27}, :offset=>0, :create_time=>2018-03-04 00:13:13 -0700, :topic=>"human", :partition=>0}
+```
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/ChadBowman/kril.
+1. Fork it ( https://github.com/ChadBowman/kril/fork )
+2. Create your feature branch (git checkout -b my-new-feature)
+3. Commit your changes (git commit -am 'add some feature')
+4. Push to the branch (git push origin my-new-feature)
+5. Create a new Pull Request
+
+Please try to obey [Rubocop](https://github.com/bbatsov/rubocop) to the best of your abilities.
 
 ## License
 
