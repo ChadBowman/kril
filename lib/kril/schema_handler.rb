@@ -5,7 +5,7 @@ module Kril
   class SchemaHandler
     # schemas_path - directory of schema repository [String]
     # schema_store - schema store [AvroTurf::SchemaStore]
-    def initialize(schemas_path: 'schemas/',
+    def initialize(schemas_path: nil,
                    schema_store: nil)
       schema_store ||= AvroTurf::SchemaStore.new(path: schemas_path)
       @schema_store = schema_store
@@ -44,7 +44,7 @@ module Kril
 
     def copy_schema_to_store(path)
       schema = File.read(path)
-      raise ArgumentError.new, "Not a valid schema: #{path}" unless schema?(schema)
+      raise ArgumentError, "Not a valid schema: #{path}" unless schema?(schema)
       schema_name = JSON.parse(schema)['name']
       new_path = File.join(@schemas_path, "#{schema_name}.avsc")
       FileUtils.copy_file(path, new_path)

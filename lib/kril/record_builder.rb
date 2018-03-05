@@ -4,7 +4,7 @@ module Kril
   # Creates and validates a record based from a defined schema.
   class RecordBuilder
     def initialize(schema_file_name: nil,
-                   schemas_dir: 'schemas/',
+                   schemas_dir: nil,
                    schema_path: nil)
       path = schema_path || File.join(schemas_dir, "#{schema_file_name}.avsc")
       file = File.read(path)
@@ -52,7 +52,7 @@ module Kril
     def check_nullity(datum, field)
       type = field['values'] || field['items'] || field['type']
       unless datum || type&.include?('null')
-        raise ArgumentError.new, "Input for #{field['name']} cannot be nil"
+        raise ArgumentError, "Input for #{field['name']} cannot be nil"
       end
     end
 

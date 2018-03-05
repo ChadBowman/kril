@@ -28,8 +28,9 @@ describe Kril::SchemaExtractor do
 
   describe '#extract' do
     it 'extracts from Avro generated java files' do
+      schema_dir = File.expand_path('../schemas', __dir__)
       Kril::SchemaExtractor.extract(source_dir: 'spec/resources/',
-                                    output_dir: 'spec/schemas/')
+                                    output_dir: schema_dir)
       path = 'spec/schemas/Trade.avsc'
       expect(File.exist?(path)).to be true
 

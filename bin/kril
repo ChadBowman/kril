@@ -23,7 +23,7 @@ Clamp do
     address_string.split(/,\s*/)
   end
   option %w[-g --schema-registry], '', 'address of schema registry', default: 'http://localhost:8081'
-  option %w[-p --schemas-path], '', 'directory of Avro schemas', default: "#{File.join(gem_root, 'schemas/')}" do |path|
+  option %w[-p --schemas-path], '', 'directory of Avro schemas', default: "#{File.join(gem_root, 'schemas')}" do |path|
     raise ArgumentError, "Schema path: #{path} is not a directory" unless File.directory?(path)
   end
   option %w[-v --verbose], :flag, 'print logs, warnings' do

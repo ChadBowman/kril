@@ -10,7 +10,6 @@ module Kril
     # output_dir - schema repository [String]
     # returns    - [nil]
     def self.extract(source_dir:, output_dir:)
-      output_dir = File.join(Dir.pwd, output_dir)
       find_java_files(source_dir) do |file|
         schema = parse_avro_java_class(file)
         write_avsc(schema, output_dir) if schema
@@ -27,6 +26,7 @@ module Kril
       Dir.glob(java_files) do |file|
         yield File.new(file)
       end
+    ensure
       Dir.chdir(old_dir)
     end
 
