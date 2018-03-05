@@ -22,12 +22,12 @@ Gem::Specification.new do |spec|
   spec.executables   = ['kril']
   spec.require_paths = ['lib']
 
-  spec.add_development_dependency 'avro_turf', '~> 0.8.0'
+  spec.add_dependency 'avro_turf', '~> 0.8.0'
+  spec.add_dependency 'clamp', '~> 1.2', '>= 1.2.1'
+  spec.add_dependency 'ruby-kafka', '~> 0.5.3'
+
   spec.add_development_dependency 'bundler', '~> 1.16'
-  spec.add_development_dependency 'clamp', '~> 1.2', '>= 1.2.1'
-  spec.add_development_dependency 'httparty', '~> 0.16.0'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.7'
   spec.add_development_dependency 'rspec-nc', '~> 0.3.0'
-  spec.add_development_dependency 'ruby-kafka', '~> 0.5.3'
 end

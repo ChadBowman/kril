@@ -1,0 +1,52 @@
+PATH
+  remote: .
+  specs:
+    kril (0.1.3)
+      avro_turf (~> 0.8.0)
+      clamp (~> 1.2, >= 1.2.1)
+      ruby-kafka (~> 0.5.3)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    avro (1.8.2)
+      multi_json
+    avro_turf (0.8.0)
+      avro (>= 1.7.7, < 1.9)
+      excon (~> 0.45)
+    clamp (1.2.1)
+    diff-lcs (1.3)
+    excon (0.60.0)
+    multi_json (1.13.1)
+    rake (10.5.0)
+    rspec (3.7.0)
+      rspec-core (~> 3.7.0)
+      rspec-expectations (~> 3.7.0)
+      rspec-mocks (~> 3.7.0)
+    rspec-core (3.7.1)
+      rspec-support (~> 3.7.0)
+    rspec-expectations (3.7.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.7.0)
+    rspec-mocks (3.7.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.7.0)
+    rspec-nc (0.3.0)
+      rspec (>= 3)
+      terminal-notifier (>= 1.4)
+    rspec-support (3.7.1)
+    ruby-kafka (0.5.3)
+    terminal-notifier (2.0.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bundler (~> 1.16)
+  kril!
+  rake (~> 10.0)
+  rspec (~> 3.7)
+  rspec-nc (~> 0.3.0)
+
+BUNDLED WITH
+   1.16.0
