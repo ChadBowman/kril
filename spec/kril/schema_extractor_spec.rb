@@ -1,12 +1,7 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Kril::SchemaExtractor do
-  subject do
-    Kril::SchemaExtractor.new(source_dir: 'spec/resources/',
-                              output_dir: 'spec/schemas/')
-  end
+  subject { Kril::SchemaExtractor }
 
   describe '#parse_avro_java_class' do
     it 'handles breaks in strings' do
@@ -19,7 +14,7 @@ describe Kril::SchemaExtractor do
       end
     end
 
-    it 'handles litteral quotes' do
+    it 'handles literal quotes' do
       test_string = <<~JAVA
         SCHEMA$ = parse("{"doc":"something like \\\\\\"No Answer\\\\\\" or \\\\\\"Abandoned\\\\\\""}");
         JAVA
@@ -33,7 +28,8 @@ describe Kril::SchemaExtractor do
 
   describe '#extract' do
     it 'extracts from Avro generated java files' do
-      subject.extract
+      Kril::SchemaExtractor.extract(source_dir: 'spec/resources/',
+                                    output_dir: 'spec/schemas/')
       path = 'spec/schemas/Trade.avsc'
       expect(File.exist?(path)).to be true
 

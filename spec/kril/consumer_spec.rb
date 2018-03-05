@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Kril::Consumer do
   before { skip 'enable for integration test' }
 

@@ -30,6 +30,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '~> 3.7'
   spec.add_development_dependency 'rspec-nc', '~> 0.3.0'
   spec.add_development_dependency 'ruby-kafka', '~> 0.5.3'
-  spec.add_development_dependency 'sinatra', '~> 2.0', '>= 2.0.1'
-  spec.add_development_dependency 'webmock', '~> 3.3'
 end

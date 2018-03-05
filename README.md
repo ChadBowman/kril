@@ -26,12 +26,11 @@ Assuming your schema is not registered with the schema registry, and doesn't exi
 ```bash
 $ kril --bootstrap-servers 'localhost:9092,localhost:9093,localhost:9094' \
 --schema-registry 'http://localhost:8081' \
---with-schema '{"type":"record","name":"human","fields":[{"name":"age","type":"int"}]}' \
+--schema '{"type":"record","name":"human","fields":[{"name":"age","type":"int"}]}' \
 --record '{"age": 27}' \
 human
 ```
 ```bash
-🦐 saved human: {"type"=>"record", "name"=>"human", "fields"=>[{"name"=>"age", "type"=>"int"}]}
 🦐 human: {"age"=>27}
 ```
 
@@ -53,7 +52,7 @@ $ kril --pretty-print human
 }
 ```
 ---
-Now that the schema exists, we can produce records simply:
+Since the schema exists in our repository, we can produce records simply:
 ```bash
 $ kril -r '{"age": 33}' human
 ```
@@ -73,16 +72,31 @@ $ kril --consume-all human
 🦐 human: {:key=>nil, :value=>{"age"=>33}, :offset=>1, :create_time=>2018-03-04 00:34:07 -0700, :topic=>"human", :partition=>3}
 🦐 human: {:key=>nil, :value=>{"age"=>27}, :offset=>0, :create_time=>2018-03-04 00:13:13 -0700, :topic=>"human", :partition=>0}
 ```
+---
+The `--schema` flag is flexible:
+```bash
+$ kril --schema /path/to/schema.avsc
+$ kril --schema name_of_existing_schema
+$ kril --schema '{"type":"record","name":"human","fields":[{"name":"age","type":"int"}]}'
+```
+---
+If no topic is given, the topic will be inferred from the schema name:
+```bash
+$ kril -s human -r '{"age":99}'
+```
+```bash
+🦐 human: {"age"=>99}
+```
 
 ## Contributing
 
 1. Fork it ( https://github.com/ChadBowman/kril/fork )
-2. Create your feature branch (git checkout -b my-new-feature)
-3. Commit your changes (git commit -am 'add some feature')
-4. Push to the branch (git push origin my-new-feature)
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
 
-Please try to obey [Rubocop](https://github.com/bbatsov/rubocop) to the best of your abilities.
+Please try to obey 👮[Rubocop](https://github.com/bbatsov/rubocop) to the best of your abilities.
 
 ## License
 

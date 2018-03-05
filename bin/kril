@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
-$VERBOSE = ARGV.map { |arg| true if arg.match?(/-v|--verbose/) }.compact.first
+$VERBOSE = nil
 
 require 'avro_turf/messaging'
 require 'kafka'
@@ -8,72 +8,108 @@ require 'clamp'
 require 'kril'
 
 Clamp do
-  option %w[-k --bootstrap-servers], '', 'address(es) of kafka cluster',
+  $log = Logger.new($STDOUT)
+  $log.level = Logger::ERROR
+
+  option %w[--version], :flag, 'show version' do
+    puts Kril::VERSION
+    exit(0)
+  end
+
+  # configuration
+  option %w[-k --bootstrap-servers], '', 'address(es) of Kafka cluster',
          default: %w[localhost:9092 localhost:9093 localhost:9094] do |address_string|
     address_string.split(/,\s*/)
   end
-  # configuration
   option %w[-g --schema-registry], '', 'address of schema registry', default: 'http://localhost:8081'
-  option %w[-p --schemas-path], '', 'directory of avro schemas', default: 'schemas/'
-  option %w[-v --verbose], :flag, 'print logs, warnings'
-  option %w[-e --pretty-print], :flag, 'pretty print records', default: false
+  option %w[-p --schemas-path], '', 'directory of Avro schemas', default: 'schemas/' do |path|
+    raise ArgumentError, "Schema path: #{path} is not a directory" unless File.directory?(path)
+  end
+  option %w[-v --verbose], :flag, 'print logs, warnings' do
+    $log.level = Logger::DEBUG
+    $VERBOSE = true
+  end
+  option %w[-e --pretty-print], :flag, 'pretty print records'
 
   # producing
   option %w[-r --record], '', 'record to commit to topic'
-  option %w[-o --syncronous], :flag, 'commit records syncronously', default: false
-  option %w[-w --with-schema], '', 'add schema to respository'
+  option %w[-o --synchronous], :flag, 'commit records synchronously'
+  option %w[-s --schema], '', 'schema name, path to schema, or schema contents'
+  option %w[-j --extract-from-java-files], '', 'extract schemas from Avro generated java files'
 
   # consuming
-  option %w[-f --follow], :flag, 'consume from topic indefinitely', defualt: false
-  option %w[-a --consume-all], :flag, 'consume every record on topic', default: false
+  option %w[-a --consume-all], :flag, 'consume every record on topic'
 
-  parameter 'TOPIC', 'topic to produce to or consume from'
-  parameter '[NAME]', 'schema name'
+  parameter '[TOPIC]', 'topic to produce to or consume from'
 
   def execute
-    if topic
-      log = Logger.new($STDOUT)
-      log.level = verbose? ? Logger::WARN : Logger::ERROR
-      kafka = Kafka.new(bootstrap_servers, logger: log, client_id: 'kril')
-      avro = AvroTurf::Messaging.new(registry_url: schema_registry,
-                                     schemas_path: schemas_path,
-                                     logger: log)
-
-      if with_schema
-        schema = JSON.parse(with_schema)
-        schema_name = schema['name']
-        path = File.join(schemas_path, "#{schema_name}.avsc")
-        File.open(path, 'w') { |file| file.write(JSON.pretty_generate(schema)) }
-        print_record("saved #{schema_name}", schema)
-      end
-
-      if record
-        producer = Kril::Producer.new(kafka: kafka, avro: avro)
-        rec = JSON.parse(record)
-        producer.send(record: rec,
-                      schema_name: name || topic,
-                      topic: topic,
-                      syncronous: syncronous?)
-        print_record(topic, rec)
-      else
-        consumer = Kril::Consumer.new(kafka: kafka, avro: avro)
-        if consume_all?
-          consumer.consume_all(topic) do |message|
-            print_record(topic, message) 
-          end
-        elsif follow?
-          consumer.listen(topic) do |message|
-            print_record(topic, message)
-          end
-        else
-          print_record(topic, consumer.consume_one(topic))
+    kafka = Kafka.new(bootstrap_servers, logger: $log, client_id: 'kril')
+    registry = AvroTurf::CachedConfluentSchemaRegistry.new(
+      AvroTurf::ConfluentSchemaRegistry.new(schema_registry, logger: $log)
+    )
+    store = AvroTurf::SchemaStore.new(path: schemas_path)
+    avro = AvroTurf::Messaging.new(registry: registry,
+                                   schema_store: store,
+                                   logger: $log)
+    if extract_from_java_files
+      Kril::SchemaExtractor.extract(source_dir: extract_from_java_files,
+                                    output_dir: schemas_path)
+    end
+    begin
+      if record && (schema || topic)
+        begin
+          produce_record(kafka, avro, store)
+        rescue AvroTurf::SchemaNotFoundError => e
+          print_error(e.message)
+        end
+      elsif topic
+        consume_records(kafka, avro) do |record|
+          print_record(topic, record)
         end
       end
+    rescue Excon::Error::Socket
+      print_error('could not connect to schema registry')
+    rescue Kafka::ConnectionError => e
+      print_error(e.message)
     end
+  end
+
+  private
+
+  def produce_record(kafka, avro, store)
+    producer = Kril::Producer.new(kafka: kafka, avro: avro)
+    schema_name = schema_name(store)
+    record_as_json = JSON.parse(record)
+    infered_topic = topic || schema_name
+    producer.send(record: record_as_json,
+                  schema_name: schema_name,
+                  topic: infered_topic,
+                  syncronous: synchronous?)
+    print_record(infered_topic, record_as_json)
+  end
+
+  def consume_records(kafka, avro)
+    consumer = Kril::Consumer.new(kafka: kafka, avro: avro)
+    if consume_all?
+      consumer.consume_all(topic) do |message|
+        yield message
+      end
+    else
+      yield consumer.consume_one(topic)
+    end
+  end
+
+  def schema_name(schema_store)
+    handler = Kril::SchemaHandler.new(schema_store: schema_store)
+    handler.process(schema || topic)
   end
 
   def print_record(topic, record)
     record = "\n#{JSON.pretty_generate(record)}" if pretty_print?
     puts "🦐 #{topic}: #{record}"
+  end
+
+  def print_error(message)
+    puts "💥 #{message}"
   end
 end

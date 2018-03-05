@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe Kril::RecordBuilder do
   describe '#build_from_record' do
     BASIC_SCHEMA = <<~AVSC

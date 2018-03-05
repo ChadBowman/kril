@@ -4,7 +4,7 @@ module Kril
   # Creates and validates a record based from a defined schema.
   class RecordBuilder
     def initialize(schema_file_name: nil,
-                   schemas_dir: 'schemas',
+                   schemas_dir: 'schemas/',
                    schema_path: nil)
       path = schema_path || File.join(schemas_dir, "#{schema_file_name}.avsc")
       file = File.read(path)
