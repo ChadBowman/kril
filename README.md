@@ -73,7 +73,7 @@ $ kril --consume-all human
 🦐 human: {:key=>nil, :value=>{"age"=>27}, :offset=>0, :create_time=>2018-03-04 00:13:13 -0700, :topic=>"human", :partition=>0}
 ```
 ---
-The `--schema` flag is flexible:
+The `--schema` option is flexible:
 ```bash
 $ kril --schema /path/to/schema.avsc
 $ kril --schema name_of_existing_schema
@@ -87,7 +87,14 @@ $ kril -s human -r '{"age":99}'
 ```bash
 🦐 human: {"age"=>99}
 ```
-
+---
+To see what schemas are saved in the repository:
+```bash
+$ kril --list-schemas
+```
+```bash
+human, another_schema
+```
 ## Contributing
 
 1. Fork it ( https://github.com/ChadBowman/kril/fork )
@@ -96,7 +103,7 @@ $ kril -s human -r '{"age":99}'
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
 
-Please try to obey 👮[Rubocop](https://github.com/bbatsov/rubocop) to the best of your abilities.
+Obey 👮[Rubocop](https://github.com/bbatsov/rubocop)! 🚨
 
 ## License
 

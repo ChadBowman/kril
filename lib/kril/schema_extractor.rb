@@ -31,6 +31,7 @@ module Kril
     end
 
     def write_avsc(contents, directory)
+      FileUtils.mkdir_p(directory) unless File.directory?(directory)
       path = File.join(directory, "#{contents['name']}.avsc")
       File.open(path, 'w') do |file|
         file.write(JSON.pretty_generate(contents))

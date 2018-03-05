@@ -10,7 +10,7 @@ require 'kril'
 Clamp do
   $log = Logger.new($STDOUT)
   $log.level = Logger::ERROR
-  gem_root = File.expand_path('..', __dir__)
+  $gem_root = File.expand_path('..', __dir__)
 
   option %w[--version], :flag, 'show version' do
     puts Kril::VERSION
@@ -23,7 +23,7 @@ Clamp do
     address_string.split(/,\s*/)
   end
   option %w[-g --schema-registry], '', 'address of schema registry', default: 'http://localhost:8081'
-  option %w[-p --schemas-path], '', 'directory of Avro schemas', default: "#{File.join(gem_root, 'schemas')}" do |path|
+  option %w[-p --schemas-path], '', 'directory of Avro schemas', default: File.join($gem_root, 'schemas').to_s do |path|
     raise ArgumentError, "Schema path: #{path} is not a directory" unless File.directory?(path)
   end
   option %w[-v --verbose], :flag, 'print logs, warnings' do
@@ -36,10 +36,13 @@ Clamp do
   option %w[-r --record], '', 'record to commit to topic'
   option %w[-o --synchronous], :flag, 'commit records synchronously'
   option %w[-s --schema], '', 'schema name, path to schema, or schema contents'
-  option %w[-j --extract-from-java-files], '', 'extract schemas from Avro generated java files'
+  option %w[-j --extract-schemas], '', 'extract schemas from Avro generated java files'
 
   # consuming
   option %w[-a --consume-all], :flag, 'consume every record on topic'
+
+  # utility
+  option %w[-l --list-schemas], :flag, 'list saved schemas'
 
   parameter '[TOPIC]', 'topic to produce to or consume from'
 
@@ -52,7 +55,7 @@ Clamp do
     avro = AvroTurf::Messaging.new(registry: registry,
                                    schema_store: store,
                                    logger: $log)
-    if extract_from_java_files
+    if extract_schemas
       Kril::SchemaExtractor.extract(source_dir: extract_from_java_files,
                                     output_dir: schemas_path)
     end
@@ -73,17 +76,22 @@ Clamp do
     rescue Kafka::ConnectionError => e
       print_error(e.message)
     end
+    if list_schemas?
+      schemas = File.join($gem_root, 'schemas', '**', '*.avsc')
+      puts Dir.glob(schemas).map { |file| File.basename(file, '.avsc') }.join(', ')
+    end
   end
 
   private
 
   def produce_record(kafka, avro, store)
     producer = Kril::Producer.new(kafka: kafka, avro: avro)
-    schema_name = schema_name(store)
+    names = schema_name(store)
     record_as_json = JSON.parse(record)
-    infered_topic = topic || schema_name
+    infered_topic = topic || names[:schema_name]
     producer.send(record: record_as_json,
-                  schema_name: schema_name,
+                  schema_name: names[:schema_name],
+                  namespace: names[:namespace],
                   topic: infered_topic,
                   syncronous: synchronous?)
     print_record(infered_topic, record_as_json)
@@ -101,7 +109,7 @@ Clamp do
   end
 
   def schema_name(schema_store)
-    handler = Kril::SchemaHandler.new(schema_store: schema_store)
+    handler = Kril::SchemaHandler.new(schema_store: schema_store, schemas_path: schemas_path)
     handler.process(schema || topic)
   end
 

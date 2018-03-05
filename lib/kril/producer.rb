@@ -20,11 +20,18 @@ module Kril
     #
     # record       - record to serialize and commit [String]
     # schema_name  - name of schema to encode record from [String]
+    # namespace    - namespace of schema (optional) [String]
     # topic        - name of topic. Will be schema_name if nil (optional) [String]
     # synchronous  - blocks until commit if true (optional) [Boolean]
-    def send(record:, schema_name:, topic: nil, syncronous: false)
+    def send(record:,
+             schema_name:,
+             namespace: nil,
+             topic: nil,
+             syncronous: false)
       topic ||= schema_name
-      encoded = @avro.encode(record, schema_name: schema_name)
+      encoded = @avro.encode(record,
+                             schema_name: schema_name,
+                             namespace: namespace)
       if syncronous
         @sync.produce(encoded, topic: topic)
         @sync.deliver_messages
