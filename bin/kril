@@ -56,7 +56,7 @@ Clamp do
                                    schema_store: store,
                                    logger: $log)
     if extract_schemas
-      Kril::SchemaExtractor.extract(source_dir: extract_from_java_files,
+      Kril::SchemaExtractor.extract(source_dir: extract_schemas,
                                     output_dir: schemas_path)
     end
     begin

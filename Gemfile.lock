@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    kril (0.2.0)
+    kril (0.2.1)
       avro_turf (~> 0.8.0)
       clamp (~> 1.2, >= 1.2.1)
       ruby-kafka (~> 0.5.3)
