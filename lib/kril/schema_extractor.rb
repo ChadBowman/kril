@@ -12,7 +12,7 @@ module Kril
     def self.extract(source_dir:, output_dir:)
       find_java_files(source_dir) do |file|
         schema = parse_avro_java_class(file)
-        write_avsc(schema, output_dir) if schema
+        SchemaHandler.new(schemas_path: output_dir).process(schema)
       end
       nil
     end
@@ -30,14 +30,6 @@ module Kril
       Dir.chdir(old_dir)
     end
 
-    def write_avsc(contents, directory)
-      FileUtils.mkdir_p(directory) unless File.directory?(directory)
-      path = File.join(directory, "#{contents['name']}.avsc")
-      File.open(path, 'w') do |file|
-        file.write(JSON.pretty_generate(contents))
-      end
-    end
-
     def dejavafy(java_string)
       java_string.split('","').join.gsub(/\\?\\"/, '"')
     end
@@ -45,7 +37,7 @@ module Kril
     def parse_avro_java_class(file)
       result = file.each_line do |line|
         extraction = line[/SCHEMA.*parse\("(.*)"\);/, 1]
-        break JSON.parse(dejavafy(extraction)) if extraction
+        break dejavafy(extraction) if extraction
       end
       result.is_a?(File) ? nil : result
     end

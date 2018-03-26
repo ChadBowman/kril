@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-describe Kril::Consumer do
-  before { skip 'enable for integration test' }
+describe Kril::Consumer  do
+  before { integration_test }
 
   avro = AvroTurf::Messaging.new(registry_url: 'http://localhost:8081',
-                                 schemas_path: 'spec/schemas/')
+                                 schemas_path: 'spec/resources/')
   kafka = Kafka.new(%w[localhost:9092 localhost:9093 localhost:9094])
 
   describe '#consume_one' do
@@ -12,10 +12,12 @@ describe Kril::Consumer do
       producer = Kril::Producer.new(kafka: kafka, avro: avro)
       subject = Kril::Consumer.new(kafka: kafka, avro: avro)
 
+      topic = SecureRandom.uuid
       producer.send(record: { 'id' => 99 },
                     schema_name: 'test',
+                    topic: topic,
                     syncronous: true)
-      result = subject.consume_one('test')
+      result = subject.consume_one(topic)
       expect(result[:value]['id']).to eq(99)
     end
   end

@@ -25,6 +25,7 @@ Clamp do
   option %w[-g --schema-registry], '', 'address of schema registry', default: 'http://localhost:8081'
   option %w[-p --schemas-path], '', 'directory of Avro schemas', default: File.join($gem_root, 'schemas').to_s do |path|
     raise ArgumentError, "Schema path: #{path} is not a directory" unless File.directory?(path)
+    path
   end
   option %w[-v --verbose], :flag, 'print logs, warnings' do
     $log.level = Logger::DEBUG
@@ -77,8 +78,8 @@ Clamp do
       print_error(e.message)
     end
     if list_schemas?
-      schemas = File.join($gem_root, 'schemas', '**', '*.avsc')
-      puts Dir.glob(schemas).map { |file| File.basename(file, '.avsc') }.join(', ')
+      schemas = File.join(schemas_path, '**', '*.avsc')
+      Dir.glob(schemas).map { |file| puts File.basename(file, '.avsc') }
     end
   end
 
@@ -86,15 +87,15 @@ Clamp do
 
   def produce_record(kafka, avro, store)
     producer = Kril::Producer.new(kafka: kafka, avro: avro)
-    names = schema_name(store)
+    name, namespace, fullname = schema_name(store)
     record_as_json = JSON.parse(record)
-    infered_topic = topic || names[:schema_name]
+    topic ||= fullname
     producer.send(record: record_as_json,
-                  schema_name: names[:schema_name],
-                  namespace: names[:namespace],
-                  topic: infered_topic,
+                  schema_name: name,
+                  namespace: namespace,
+                  topic: topic,
                   syncronous: synchronous?)
-    print_record(infered_topic, record_as_json)
+    print_record(topic, record_as_json)
   end
 
   def consume_records(kafka, avro)
@@ -110,7 +111,8 @@ Clamp do
 
   def schema_name(schema_store)
     handler = Kril::SchemaHandler.new(schema_store: schema_store, schemas_path: schemas_path)
-    handler.process(schema || topic)
+    schema_object = handler.process(schema || topic)
+    [schema_object.name, schema_object.namespace, schema_object.fullname]
   end
 
   def print_record(topic, record)

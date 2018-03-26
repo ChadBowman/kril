@@ -93,7 +93,8 @@ To see what schemas are saved in the repository:
 $ kril --list-schemas
 ```
 ```bash
-human, another_schema
+human
+another_schema
 ```
 ## Contributing
 

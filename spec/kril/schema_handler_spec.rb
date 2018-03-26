@@ -8,23 +8,23 @@ describe Kril::SchemaHandler do
   describe '#process' do
     it 'handles a schema path' do
       temp_file(schema) do |file|
-        name = subject.process(file.path)[:schema_name]
-        path = "#{schemas_path}#{name}.avsc"
+        subject.process(file.path)
+        path = "#{schemas_path}temp.avsc"
         expect(File.exist?(path)).to be true
         File.delete(path)
       end
     end
 
     it 'handles schema contents' do
-      name = subject.process(schema)[:schema_name]
-      path = "#{schemas_path}#{name}.avsc"
+      subject.process(schema)
+      path = "#{schemas_path}temp.avsc"
       expect(File.exist?(path)).to be true
       File.delete(path)
     end
 
     it 'handles a schema name' do
-      name = subject.process('test')[:schema_name]
-      expect(name).to eq('test')
+      schema = subject.process('test')
+      expect(schema).to_not be nil
     end
 
     it 'errors if no schema found' do
@@ -33,26 +33,26 @@ describe Kril::SchemaHandler do
 
     it 'handles a complex schema' do
       schema = subject.process('spec/resources/complex.avsc')
-      path = File.join(schemas_path, schema[:namespace].split('.'), "#{schema[:schema_name]}.avsc")
+      p path = File.join(schemas_path, 'net', 'orthus', 'schemas')
       expect(File.exist?(path)).to be true
       FileUtils.rm_r(File.join(schemas_path, 'net'))
     end
 
     it 'handles colliding schema name' do
-      schema1 = '{"type":"record","name":"temp","namespace":"one"}'
-      schema2 = '{"type":"record","name":"temp","namespace":"two"}'
-      result1 = subject.process(schema1)
-      result2 = subject.process(schema2)
-      path1 = File.join(schemas_path, result1[:namespace].split('.'), "#{result1[:schema_name]}.avsc")
-      path2 = File.join(schemas_path, result2[:namespace].split('.'), "#{result2[:schema_name]}.avsc")
+      schema1 = '{"type":"record","name":"temp","namespace":"one","fields":[]}'
+      schema2 = '{"type":"record","name":"temp","namespace":"two","fields":[]}'
 
-      expect(path1).to eq("#{schemas_path}one/temp.avsc")
-      expect(path2).to eq("#{schemas_path}two/temp.avsc")
+      subject.process(schema1)
+      subject.process(schema2)
+
+      path1 = File.join(schemas_path, 'one', 'temp.avsc')
+      path2 = File.join(schemas_path, 'two', 'temp.avsc')
+
       expect(File.exist?(path1)).to be true
       expect(File.exist?(path2)).to be true
 
-      FileUtils.rm_r(File.join(schemas_path, result1[:namespace].split('.').first))
-      FileUtils.rm_r(File.join(schemas_path, result2[:namespace].split('.').first))
+      FileUtils.rm_r(File.join(schemas_path, 'one'))
+      FileUtils.rm_r(File.join(schemas_path, 'two'))
     end
   end
 

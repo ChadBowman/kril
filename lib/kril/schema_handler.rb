@@ -15,28 +15,27 @@ module Kril
     # Handles input to reference or create schema.
     #
     # input_string - schema name, schema file, or schema contents [String]
-    # returns      - schema name, namespace [Hash]
+    # returns      - stored schema [Avro::Schema]
     def process(input_string)
-      if File.exist?(input_string)
-        copy_schema_to_store(input_string)
-      elsif schema?(input_string)
-        save_schema(input_string)
-      else
-        name, namespace = separate_fullname(input_string)
-        namespace = nil if namespace.empty?
-        schema = @schema_store.find(name, namespace)
-        {
-          schema_name: schema&.name,
-          namespace: schema&.namespace
-        }
-      end
+      name, namespace =
+        if File.exist?(input_string)
+          copy_schema_to_store(input_string)
+        elsif schema?(input_string)
+          save_schema(input_string)
+        else
+          separate_fullname(input_string)
+        end
+      @schema_store.find(name, namespace)
     end
 
     private
 
     def separate_fullname(fullname)
       arr = fullname.split('.')
-      [arr.pop, arr.join('.')]
+      name = arr.pop
+      namespace = arr.join('.')
+      namespace = nil if namespace.empty?
+      [name, namespace]
     end
 
     def schema?(input)
@@ -45,38 +44,25 @@ module Kril
       false
     end
 
+    def build_path(name, namespace)
+      base = namespace ? File.join(@schemas_path, namespace.split('.')) : @schemas_path
+      File.join(base, "#{name}.avsc")
+    end
+
     def save_schema(schema)
       schema = JSON.parse(schema)
-      schema_name = schema['name']
-      namespace = schema['namespace']
-      if namespace
-        path = File.join(@schemas_path, namespace.split('.'))
-        FileUtils.mkdir_p(path)
-      end
-      File.open(File.join(path || @schemas_path, "#{schema_name}.avsc"), 'w') do |file|
+      path = build_path(schema['name'], schema['namespace'])
+      FileUtils.mkdir_p(File.dirname(path))
+      File.open(path, 'w') do |file|
         file.write(JSON.pretty_generate(schema))
       end
-      {
-        schema_name: schema_name,
-        namespace: namespace
-      }
+      [schema['name'], schema['namespace']]
     end
 
     def copy_schema_to_store(path)
       schema = File.read(path)
       raise ArgumentError, "Not a valid schema: #{path}" unless schema?(schema)
-      json = JSON.parse(schema)
-      schema_name = json['name']
-      namespace = json['namespace']
-      if namespace
-        schema_path = File.join(@schemas_path, namespace.split('.'))
-        FileUtils.mkdir_p(schema_path)
-      end
-      FileUtils.copy_file(path, File.join(schema_path || @schemas_path, "#{schema_name}.avsc"))
-      {
-        schema_name: schema_name,
-        namespace: namespace
-      }
+      save_schema(schema)
     end
   end
 end
