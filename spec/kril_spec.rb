@@ -12,7 +12,7 @@ describe Kril do
 
   it 'lists schemas' do
     schemas = `bin/kril --schemas-path spec/resources --list-schemas`
-    expect(schemas.split("\n").sort).to eq(%w[complex test])
+    expect(schemas.split("\n")).to eq(%w[complex test])
   end
 
   it 'produces a record' do

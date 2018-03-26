@@ -17,6 +17,7 @@ module Kril
     # input_string - schema name, schema file, or schema contents [String]
     # returns      - stored schema [Avro::Schema]
     def process(input_string)
+      return nil unless input_string
       name, namespace =
         if File.exist?(input_string)
           copy_schema_to_store(input_string)

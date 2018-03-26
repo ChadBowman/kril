@@ -2,14 +2,15 @@
 
 Kril is an easy to use command line interface (CLI) for interacting with [Apache Kafka](https://kafka.apache.org/). It uses [Apache Avro](https://avro.apache.org/) for serialization/deserialization.
 
-[![Build Status](https://travis-ci.org/ChadBowman/kril.svg?branch=master)](https://travis-ci.org/ChadBowman/kril)
+[![Build Status](https://img.shields.io/travis/ChadBowman/kril.svg?style=for-the-badge)](https://travis-ci.org/ChadBowman/kril)
+[![Gem](https://img.shields.io/gem/v/kril.svg?style=for-the-badge)](https://rubygems.org/gems/kril)
 
 ## Installation
 
 Add this line to your application's Gemspec:
 
 ```ruby
-spec.add_development_dependency 'kril', '~> 0.1'
+spec.add_dependency 'kril', '~> 0.1'
 ```
 
 And then execute:
@@ -19,6 +20,7 @@ And then execute:
 Or install it yourself as:
 
     $ gem install kril
+
 
 ## Usage
 
@@ -93,9 +95,10 @@ To see what schemas are saved in the repository:
 $ kril --list-schemas
 ```
 ```bash
-human
 another_schema
+human
 ```
+
 ## Contributing
 
 1. Fork it ( https://github.com/ChadBowman/kril/fork )
@@ -109,3 +112,4 @@ Obey 👮[Rubocop](https://github.com/bbatsov/rubocop)! 🚨
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+

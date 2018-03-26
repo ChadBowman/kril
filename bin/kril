@@ -79,7 +79,9 @@ Clamp do
     end
     if list_schemas?
       schemas = File.join(schemas_path, '**', '*.avsc')
-      Dir.glob(schemas).map { |file| puts File.basename(file, '.avsc') }
+      files = Dir.glob(schemas).map { |file| File.basename(file, '.avsc') }
+      files.sort.each { |name| puts name }
+      files
     end
   end
 

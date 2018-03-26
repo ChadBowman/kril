@@ -33,7 +33,7 @@ describe Kril::SchemaHandler do
 
     it 'handles a complex schema' do
       schema = subject.process('spec/resources/complex.avsc')
-      p path = File.join(schemas_path, 'net', 'orthus', 'schemas')
+      path = File.join(schemas_path, 'net', 'orthus', 'schemas')
       expect(File.exist?(path)).to be true
       FileUtils.rm_r(File.join(schemas_path, 'net'))
     end
