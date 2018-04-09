@@ -40,4 +40,10 @@ describe Kril do
       expect(result.include?('🦐')).to be true
     end
   end
+
+  it 'can use a custom topic' do
+    integration_test
+    result = `bin/kril -s human -r '{"age":9}' customTopic`
+    expect(result.include?('customTopic')).to be true
+  end
 end

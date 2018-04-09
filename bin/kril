@@ -91,13 +91,12 @@ Clamp do
     producer = Kril::Producer.new(kafka: kafka, avro: avro)
     name, namespace, fullname = schema_name(store)
     record_as_json = JSON.parse(record)
-    topic ||= fullname
     producer.send(record: record_as_json,
                   schema_name: name,
                   namespace: namespace,
-                  topic: topic,
+                  topic: topic || fullname,
                   syncronous: synchronous?)
-    print_record(topic, record_as_json)
+    print_record(topic || fullname, record_as_json)
   end
 
   def consume_records(kafka, avro)
