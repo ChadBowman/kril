@@ -1,0 +1,127 @@
+#!/usr/bin/env ruby
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+$VERBOSE = nil
+
+require 'avro_turf/messaging'
+require 'kafka'
+require 'clamp'
+require 'kril'
+
+Clamp do
+  $log = Logger.new($STDOUT)
+  $log.level = Logger::ERROR
+  $gem_root = File.expand_path('..', __dir__)
+
+  option %w[--version], :flag, 'show version' do
+    puts Kril::VERSION
+    exit(0)
+  end
+
+  # configuration
+  option %w[-k --bootstrap-servers], '', 'address(es) of Kafka cluster',
+         default: %w[localhost:9092 localhost:9093 localhost:9094] do |address_string|
+    address_string.split(/,\s*/)
+  end
+  option %w[-g --schema-registry], '', 'address of schema registry', default: 'http://localhost:8081'
+  option %w[-p --schemas-path], '', 'directory of Avro schemas', default: File.join($gem_root, 'schemas').to_s do |path|
+    raise ArgumentError, "Schema path: #{path} is not a directory" unless File.directory?(path)
+    path
+  end
+  option %w[-v --verbose], :flag, 'print logs, warnings' do
+    $log.level = Logger::DEBUG
+    $VERBOSE = true
+  end
+  option %w[-e --pretty-print], :flag, 'pretty print records'
+
+  # producing
+  option %w[-r --record], '', 'record to commit to topic'
+  option %w[-o --synchronous], :flag, 'commit records synchronously'
+  option %w[-s --schema], '', 'schema name, path to schema, or schema contents'
+  option %w[-j --extract-schemas], '', 'extract schemas from Avro generated java files'
+
+  # consuming
+  option %w[-a --consume-all], :flag, 'consume every record on topic'
+
+  # utility
+  option %w[-l --list-schemas], :flag, 'list saved schemas'
+
+  parameter '[TOPIC]', 'topic to produce to or consume from'
+
+  def execute
+    kafka = Kafka.new(bootstrap_servers, logger: $log, client_id: 'kril')
+    registry = AvroTurf::CachedConfluentSchemaRegistry.new(
+      AvroTurf::ConfluentSchemaRegistry.new(schema_registry, logger: $log)
+    )
+    store = AvroTurf::SchemaStore.new(path: schemas_path)
+    avro = AvroTurf::Messaging.new(registry: registry,
+                                   schema_store: store,
+                                   logger: $log)
+    if extract_schemas
+      Kril::SchemaExtractor.extract(source_dir: extract_schemas,
+                                    output_dir: schemas_path)
+    end
+    begin
+      if record && (schema || topic)
+        begin
+          produce_record(kafka, avro, store)
+        rescue AvroTurf::SchemaNotFoundError => e
+          print_error(e.message)
+        end
+      elsif topic
+        consume_records(kafka, avro) do |record|
+          print_record(topic, record)
+        end
+      end
+    rescue Excon::Error::Socket
+      print_error('could not connect to schema registry')
+    rescue Kafka::ConnectionError => e
+      print_error(e.message)
+    end
+    if list_schemas?
+      schemas = File.join(schemas_path, '**', '*.avsc')
+      files = Dir.glob(schemas).map { |file| File.basename(file, '.avsc') }
+      files.sort.each { |name| puts name }
+      files
+    end
+  end
+
+  private
+
+  def produce_record(kafka, avro, store)
+    producer = Kril::Producer.new(kafka: kafka, avro: avro)
+    name, namespace, fullname = schema_name(store)
+    record_as_json = JSON.parse(record)
+    producer.send(record: record_as_json,
+                  schema_name: name,
+                  namespace: namespace,
+                  topic: topic || fullname,
+                  syncronous: synchronous?)
+    print_record(topic || fullname, record_as_json)
+  end
+
+  def consume_records(kafka, avro)
+    consumer = Kril::Consumer.new(kafka: kafka, avro: avro)
+    if consume_all?
+      consumer.consume_all(topic) do |message|
+        yield message
+      end
+    else
+      yield consumer.consume_one(topic)
+    end
+  end
+
+  def schema_name(schema_store)
+    handler = Kril::SchemaHandler.new(schema_store: schema_store, schemas_path: schemas_path)
+    schema_object = handler.process(schema || topic)
+    [schema_object.name, schema_object.namespace, schema_object.fullname]
+  end
+
+  def print_record(topic, record)
+    record = "\n#{JSON.pretty_generate(record)}" if pretty_print?
+    puts "🦐 #{topic}: #{record}"
+  end
+
+  def print_error(message)
+    puts "💥 #{message}"
+  end
+end
